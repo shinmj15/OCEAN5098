@@ -32,10 +32,10 @@ navbar:
           href: dplyr.html  
         - text: "tidyr"
           href: tidyr.html 
-#    - text: "Types & Structures"
-#      href: types.html
-#    - text: "Graphics"
-#      href: graphics.html
+    - text: "Types & Structures"
+      href: types.html
+    - text: "Graphics"
+      href: graphics.html
 #    - text: "Mapping"
 #      href: mapping.html
 #    - text: "Loops & Functions"
