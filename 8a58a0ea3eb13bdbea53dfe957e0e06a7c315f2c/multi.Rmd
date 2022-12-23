@@ -36,13 +36,12 @@ library(mvabund)
 library(mvpart) # install_github("cran/mvpart", force = T) # after devtools
 library(MVPARTwrap) # install_github("cran/MVPARTwrap", force = T) # after devtools
 
-Sys.setlocale("LC_ALL", "English")
-
-
-source('https://www.dipintothereef.com/uploads/3/7/3/5/37359245/coldiss.r') # import coldiss () function  (Borcard et al. 2011) 
+#  functions from Borcard et al. 2011
+source('https://www.dipintothereef.com/uploads/3/7/3/5/37359245/coldiss.r') 
 source ('https://www.dipintothereef.com/uploads/3/7/3/5/37359245/panelutils.r')
 source ('https://www.dipintothereef.com/uploads/3/7/3/5/37359245/cleanplot.pca.r')
 source ('https://www.dipintothereef.com/uploads/3/7/3/5/37359245/evplot.r')
+#Sys.setlocale("LC_ALL", "English")
 ```
 
 
@@ -54,7 +53,11 @@ Ecological phenomena are inherently complex, and it is rare that a single variab
 
 Multivariate analyses may reveal patterns that would not be detectable by combination of univariate methods.
 
-![*__Comparaison between univariate and multivariate analyses__: multivariate methods allow the evaluation of all response variables simultaneously. R~1,...,i~: Response variables; E~1,...,i~: Explanatory variables; S~1,...,i~: Samples*](Figures/multi.png)
+
+<center>
+![*__Comparaison between univariate and multivariate analyses__: multivariate methods allow the evaluation of all response variables simultaneously. R~1,...,i~: Response variables; E~1,...,i~: Explanatory variables; S~1,...,i~: Samples*](Figures/multi.png){width=100%}
+</center>
+
 
 # Applications
 
@@ -72,7 +75,10 @@ Five types of scientific inquiries usually suit to the application of multivaria
 
 + **Prediction**: once the dependence detected and characterized multivariate models may be constructed in a very similar as we did before with univariate models.
 
-![*__Correspondance analysis of methods usage in various scientific fields__: axis 1 differentiate microscopic from macroscopic organisms. Cluster, PCA, etc are exploratory methods and apply preferentially to small organisms.* ](Figures/multi_CA.png)
+<center>
+![*__Correspondance analysis of methods usage in various scientific fields__: axis 1 differentiate microscopic from macroscopic organisms. Cluster, PCA, etc are exploratory methods and apply preferentially to small organisms.* ](Figures/multi_CA.png){width=50%}
+</center>
+
 
 # Data Structure
 
@@ -82,12 +88,13 @@ In ecology, the'typical' dataset used in multivariate analyses will be represent
 
 + measured variables for those objects in columns (e.g. species, environmental parameters, etc.)
 
+<center>
 ![](Figures/multi_data.png)
-
+</center>
 *Important note*: observations on object are not necessarily __independent__ on those made on another object, and a mixture of dependent and independent objects is possible e.g. site and year  
 
 
-Measured variables can be binary, quantitative, qualitative, rank-ordered, or even a mixture of them. If variables do not have uniform scale (e.g. environmental parameters measured in different units or scales), they usually have to be transformed before performing further analyses.
+Measured variables can be binary, quantitative, qualitative, rank-ordered, or even a mixture of them. If variables do not have uniform scale (e.g. environmental parameters measured in different units or scales), they usually have to be transformed (see [here](https://sites.google.com/site/mb3gustame/reference/transformations) for more details about it) before performing further analyses.
 
  - **Standardization**: provides dimensionless variables and removes the influence of magnitude differences between scales and units
 
@@ -135,7 +142,9 @@ varespec.pa [1:5,1:5]
 
 + When pairs of objects are compared, the analysis is said to be in **Q mode**.When pairs of descriptors are compared, the analysis is said to be in **R mode**.
 
-![](Figures/multi_modes.png)
+<center>
+![](Figures/multi_modes.png){width=50%}
+</center>
 
 ## Q mode
 
@@ -153,23 +162,32 @@ Because of the **double-zeros** problem, 2 classes of association measures exist
 
 + The **asymmetrical coefficients** will ignore the information send from the double-zero. 
 
-When analyzing species data, it is often recommended to use asymmetrical coefficients unless you have reason to consider each double absence in the matrix (*e.g. controlled experiment with known community composition or ecologically homogenous areas with disturbed zones*)
+When analyzing species data, it is often recommended to use asymmetrical coefficients unless you have reason to consider each double absence in the matrix (*e.g. controlled experiment with known community composition or ecologically homogeneous areas with disturbed zones*)
 
-### * Common presence/absence-based dissimilarity metrics**
+### Example of common dissimilarity metrics
 
-We use **Jaccard Similarity (S~7~)** to find similarities between sets. So first, let’s learn the very basics of sets.
+#### Presence/absence-based metrics
 
-![](Figures/multi_PA1.png)
+**Jaccard Similarity (S~7~)** is used to find similarities between sets. Computation is very simple when caomparing two sets:
 
-![](Figures/multi_PA2.png)
+<center>
+![](Figures/multi_PA1.png){width=50%}
+</center>
+
+<center>
+![](Figures/multi_PA2.png){width=50%}
+</center>
 
 Now going back to Jaccard similarity.The Jaccard similarity measures similarity between finite sample sets, and is defined as the cardinality of the intersection of sets divided by the cardinality of the union of the sample sets. Suppose you want to find jaccard similarity between two sets A and B it is the ration of cardinality of A ∩ B and A ∪ B.
 
-![](Figures/multi_PA3.png)
+<center>
+![](Figures/multi_PA3.png){width=50%}
+</center>
 
-Other distances applying to presence-Absence data: Sørensen (S~8~), Ochiai (S~14~) 
+This measure is very important when comparing $\beta$-diversity among sites.  Other distances applying to presence-Absence data: Sørensen (S~8~), Ochiai (S~14~) 
 
-### **Common abundance-based dissimilarity metrics**
+
+#### Abundance-based metrics
 
 When your community data samples include abundance information (as opposed to simple presence-absence) you have a wider choice of metrics to use in calculating (dis)similarity. 
 
@@ -186,8 +204,10 @@ You can get the spreadsheet [here](Data/Distance-metrics.xlsx) to examine how to
 
 **Euclidean distance (D~2~)** is the most commonly-used of our distance measures. For this reason, Euclidean distance is often just to referred to as “distance”. When data is dense or continuous, this is the best proximity measure. The Euclidean distance between two points is the length of the path connecting them.This distance between two points is given by the Pythagorean theorem.
 
+<center>
+![](Figures/multi_euc.png){width=50%}
+</center>
 
-![](Figures/multi_euc.png)
 
 Here the abundance of a species from one sample is subtracted from its counterpart in the other sample. Instead of ignoring the sign, the result is squared (which gives a positive value):
 
@@ -195,7 +215,9 @@ $E_d=\sqrt{\sum (x_i-y_j)^2}$
 
 **Manhattan distance** is a metric in which the distance between two points is the sum of the absolute differences of their Cartesian coordinates. In simple way of saying it is the absolute sum of difference between the x-coordinates and y-coordinates. Suppose we have a Point A and a Point B: if we want to find the Manhattan distance between them, we just have to sum up the absolute x-axis and y–axis variation. We find the Manhattan distance between two points by measuring along axes at right angles.
 
-![](Figures/multi_man.png)
+<center>
+![](Figures/multi_man.png){width=50%}
+</center>
 
 This is the simplest dissimilarity metric to compute:
 
@@ -206,24 +228,26 @@ $CB_d = \sum|x_i-x_j|$
 
 $BC_d =  \frac {\sum |x_i-x_j|}{\sum(x_i+x_j)}$
 
-![](Figures/multi_BC.png)
+<center>
+![](Figures/multi_BC.png){width=50%}
+</center>
 
 The **Canberra** dissimilarity uses the same components as Bray-Curtis but the components are summed differently:
 
 
 $C_d =  \sum \frac { |x_i-x_j|}{(x_i+x_j)}$
 
-![](Figures/multi_can.png)
+![](Figures/multi_can.png){width=50%}
 
 Many other 'distances' exist, each with their code
 
-![](Figures/multi_coeff.png)
+![](Figures/multi_coeff.png){width=50%}
 
-Those distance can be computed from an un-transformed or transformed matrix.
+Those distance can be computed from an un-transformed or transformed matrix and for many used in ecology will deal with the double-zero problem.  
 
 ### Computation
 
-The functions `vegdist` from the `vegan`package and `dist` from the `stats` package compute  dissimilarity indices useful and popular among community ecologists.
+The functions `vegdist` from the `vegan` package and `dist` from the `stats` package compute  dissimilarity indices useful and popular among community ecologists.
 
 ```{r,  eval=T}
 # using varespec dataset
@@ -325,12 +349,12 @@ env.o<-order.single(env.pearson)
 pairs (env[,env.o], lower.panel=panel.smooth, upper.panel=panel.cor,diag.panel=panel.hist, main='Pearson Correlation Matrix')
 ```
 
-<p class="alert">
-**Practice M1:** Using the `tikus` data set from the package `mvabund` - check `?tikus`. Select observation for the year  1981, 1983, and 1985 only (noted `81`, `83` and `85`). Build a  Bray-Curtis dissimilarity matrix among selected observations. Plot heat map of the respective matrix. Build a network of species co-occurence (presence/absence) based on your selection. Push both your *.Rmd* and *.html* files into a public repository available from your Github account.You will share with me be email [vianneydenis@g.ntu.edu.tw] the address (URL) of this repository (such as https://github.com/vianneydenis/OCEAN5098.git) **before next Monday** in order for me to check your work. The **title of your email ** should be `Practice M1 (your name: your student no.).
+<p class="comment">
+**Practice 8.1** Using the `tikus` data set from the package `mvabund` - check `?tikus`. Select observation for the year  1981, 1983, and 1985 only (noted `81`, `83` and `85`). Build a  Bray-Curtis dissimilarity matrix among selected observations. Plot heat map of the respective matrix. Build a network of species co-occurrence (presence/absence) based on your selection of years.
 </p>
 
 
-# Cluster
+# Trees
 
 We often aim to recognize discontinuous **subsets** in an environment which is  represented by discrete (taxonomy) changes but  perceived as continuous changes in ecology.
 
@@ -354,7 +378,7 @@ Many **clustering** approaches rely on association matrix, which stresses on the
 
 6. **Hard** and **Soft** (may overlap)
 
-Calculate numerical classification often requires two arguments: matrix of distances among samples (ecological resemblance, D) and the method to us e.g.: name of the clustering algorithm.
+Calculate numerical classification often requires two arguments: matrix of distances among samples (ecological resemblance, D) and the method to us *e.g.*: name of the clustering algorithm.
 
 Common hierarchical clustering methods are available through the function `hclust` from the `stats` package. Be careful of:
 
@@ -410,8 +434,10 @@ plot(spe.ch.complete, main='Complete linkage agglomerative clustering')
   + it is the method the **most common** in ecology (species data)
 
   + this family comprises **four methods** that are based on **average** dissimilarities among objects or on the **centroids** of cluster,
-
-![](Figures/multi_upgma.png)
+  
+<center>
+![](Figures/multi_upgma.png){width=75%}
+</center>
 
 *e.g. Average agglomerative clustering (UPGMA) computed on chord distance matrix*
 
@@ -424,7 +450,7 @@ plot(spe.ch.UPGMA, main='Average (UPGMA) agglomerative clustering')
 
     + **Ward** method is also a favorite  clustering method: Unlike the others. Instead of measuring the distance directly, it analyzes the variance of clusters. Ward’s is said to be the most suitable method for quantitative variables.
  
-    + it is based on linear model criterion of least square: within-group sum of square (i.e. the square error of ANOVA) is minimized.
+    + it is based on linear model criterion of least square: within-group sum of square is minimized.
  
 **Note**: Ward method is based on Euclidean model. It should not be combined with distance measures, which are not strictly metric such as the popular Bray-Curtis distance.
 
@@ -486,7 +512,7 @@ dev.off()
 
 * **Fusion Level values**
 
-The plot of the **Fusion Level Values** is further used a diagnostic of interpretable cluster groups. It examines values where a fusion between two branches of a dendrogram occurs. Speifically, this graph is is useful whenever you want to define an interpretable cutting levels.
+The plot of the **Fusion Level Values** is further used a diagnostic of interpretable cluster groups. It examines values where a fusion between two branches of a dendrogram occurs. Specifically, this graph is is useful whenever you want to define an interpretable cutting levels.
 
 ```{r class.source = "fold-show", eval=T, warning=F}
 plot(spe.ch.UPGMA$height, nrow(spe):2, 
@@ -585,7 +611,6 @@ fviz_nbclust(spe.norm, hcut, diss=dist(spe.norm, method='euclidean'),method = "w
 #fviz_nbclust(spe.norm, hcut, diss=dist(spe.norm, method='euclidean'),method = "silhouette",hc_method = "average")
 ```
 
-
 * The **Mantel** test
 
  + Compares the original distance matrix to (binary) matrices
@@ -647,6 +672,8 @@ rect.hclust(spe.ch.UPGMA, k=8, border = 'blue')
 * Spatial clustering (example)
 
 ```{r class.source = "fold-show", eval=T, warning=F}
+# note on the of Euclidean distance and Ward.D: SS based clustering 
+# Bray + UPGMA can be try
 # ?doubs
 data(doubs)
 doubs.spe<-doubs$fish
@@ -656,6 +683,7 @@ doubs.spe <- doubs.spe[-8,]
 doubs.spa <- doubs.spa[-8,]
 # Calculates hierarchical cluster analysis of species data 
 eucl.ward <- hclust (d = dist (doubs.spe), method = 'ward.D')
+fviz_nbclust(doubs.spe, hcut, diss=dist(doubs.spe, method='euclidean'),method = "wss",hc_method = "single")
 # Dendrogram with the observed groups
 par(mfrow=c(1,2))
 plot (eucl.ward)
@@ -678,13 +706,13 @@ heatmap(as.matrix(spe.ch),Rowv=dend,symm=TRUE, margin=c(3,3))
 
 
 <p class="comment">
-**Practice M2:** Using `tikus` data set and subest on years 1981, 1983 and 1985: compute the three common clustering methods (single, complete, average) on a Bray-Curtis dissimilarities matrix. Compare resulting dendrograms using cophenetic correlation and Shepard-like diagram. Choose method with the one with the highest cophenetic correlation and produce a heat map of the reordered distance matrix together with a visualization of the related dendrogram. 
+**Practice 8.2** Using `tikus` data set and subset on years 1981, 1983 and 1985: compute the three common clustering methods (single, complete, average) on a Bray-Curtis dissimilarities matrix. Compare resulting dendrograms using cophenetic correlation and Shepard-like diagram. Choose method with the one with the highest cophenetic correlation and produce a heat map of the reordered distance matrix together with a visualization of the related dendrogram. 
 </p>
 
 
 ## Non-Hierarchical Clustering
 
-(NOTE ON FUZZY)
+(NOTE ON FUZZY - BRIEFLY EXPLAINED BELOW)
 
 + Create partition, without hierarchy.
 
@@ -698,7 +726,7 @@ The most known and commonly used non-hierarchical **partitioning algorithms** is
 
 Three  crital steps:
 
-  + **Initialization** (various Methods: Lloyd's algorithm is the mots common): _k_ observations from the dataset are used as the initial means. The **random partition** method first randomly assigns a cluster to each observation and then proceeds to the update step, thus computing the initial mean to be the centroid of the cluster's randomly assigned points. 
+  + **Initialization** (various Methods: Lloyd's algorithm is the most common): _k_ observations from the dataset are used as the initial means. The **random partition** method first randomly assigns a cluster to each observation and then proceeds to the update step, thus computing the initial mean to be the centroid of the cluster's randomly assigned points. 
 
   + **Assignment step** Assign each observation to the cluster with the nearest mean: that with the least squared Euclidean distance (Mathematically, this means partitioning the observations according to the Voronoi diagram generated by the means) 
   
@@ -707,7 +735,10 @@ Three  crital steps:
 
 The algorithm has **converged** when the assignments no longer change. The algorithm is not always guaranteed to find the optimum.
 
-![](Figures/multi_kmean.gif)
+<center>
+![](Figures/multi_kmean.gif){width=50%}
+</center>
+
 
 The algorithm is often presented as assigning objects to the nearest cluster by distance. Using a different distance function other than (squared) Euclidean distance may prevent the algorithm from converging. Various modifications of _k_-means such as **_k_-medoids** [**PAM (Partitioning Around Medoids**, Kaufman & Rousseeuw, 1990] have been proposed to allow using other distance measures. In this case, cluster is represented by one of the objects in the cluster.
 
@@ -715,13 +746,16 @@ The algorithm is often presented as assigning objects to the nearest cluster by 
 
 Let's watch a video to undertand clearly what is K-means clustering:   https://www.youtube.com/watch?v=4b5d3muPQmA
 
-If this is not clear, check [this video](https://www.youtube.com/watch?v=zHbxbb2ye3E) with an example with playing cards.
+If this is not clear, check [this video](https://www.youtube.com/watch?v=zHbxbb2ye3E) with an example with playing cards (very bad sound quality.
 
 ### K-means/PAM implementation
 
 The aims is to identify **high-density regions** in the data. To do so, the method iteratively minimizes an objective function the **total error sum of squares (TESS or SSE)**, which is the sum of the within groups sums-of squares. *It is basically the sum, over the _k_ groups, of the sums of squared distance among the objects in the group, each divided by the number of objects in the group.*
 
-![](Figures/multi_kmean_2.gif)
+<center>
+![](Figures/multi_kmean_2.gif){width=50%}
+</center>
+
 With a pre-determined number of groups, recommended function is: `kmeans` from the `stats` package. Argument `nstart` will repeat the analysis a large number of time using different initial configuration until finding the best solution.
 
 *Note: do not forget to normalized your data*
@@ -741,7 +775,7 @@ fviz_cluster(spe.kmeans, data = spe.norm,geom = "point",
 
 ### Best partition
 
-**Evaluating** partition using elbow and silouette indicators:
+**Evaluating** partition is made using similar indicators than above (note: some may only apply to hierarchical or non-hierarchical clustering). Next are elbow and silhouette indicators:
 
 ```{r,  eval=T, message=F}
 # elbow, UPGMA, chord
@@ -786,7 +820,7 @@ plot(silhouette(pam3))
 # grid.arrange(plot1, plot2,plot3, ncol=3)
 ```
 
-### Visualizing partitions
+Visualize the partitions:
 
 ```{r,  eval=T, message=F}
 pam.res<-pam(spe.norm, k=6)
@@ -846,7 +880,7 @@ using our Doubs dataset
 
 
 <p class="comment">
-**Practice M3:** Using `iris` data set: (1) make a K-means cascade and use the silhouette width indicator to determine the optimal number of clusters. (2)  since we know that 3 species are involved, group the data into 3 clusters (common sense) using the `kmeans` function. How many points are wrongly classified between optimal in (1) and the solution here? Plot both solutions.
+**Practice 8.3** Using `iris` data set: (1) make a K-means cascade and use the silhouette width indicator to determine the optimal number of clusters. (2)  since we know that 3 species are involved, group the data into 3 clusters (common sense) using the `kmeans` function. How many points are wrongly classified between optimal in (1) and the solution here? Plot both solutions.
 </p>
 
 ```{r,  eval=T, message=F}
@@ -878,7 +912,7 @@ grid.arrange(plot7, plot8, ncol=2)
 
 ### Classification And Regression Trees (CART)
 
-The function `ctree` builds decision trees ([recursive partitioning algorithm](https://cran.r-project.org/web/packages/partykit/vignettes/ctree.pdf)). The first parameter is a formula, which defines a target variable and a list of independent variables.
+The functions `tree` and `ctree` builds decision trees ([recursive partitioning algorithm](https://cran.r-project.org/web/packages/partykit/vignettes/ctree.pdf)). The first parameter is a formula, which defines a target variable and a list of independent variables.
 
 ```{r class.source = "fold-show",  eval=T}
 tree1<-tree(Species~Sepal.Length + Sepal.Width + Petal.Length + Petal.Width, data=iris)
@@ -895,7 +929,7 @@ tree2 <- rpart(Species ~ ., data=iris, method="class")
 fancyRpartPlot(tree2, main="Iris")
 ```
 
-One of the disadvantages of decision trees may be **overfitting** i.e. continually creating partitions to achieve a relatively homogeneous population. This problem can be alleviated by **pruning** the tree (CART), which is basically removing the decisions from the bottom to up. Another way is to **combine several trees** and obtain a consensus, which can be done via a process called **random forests** (bootstrapped version of CART - many trees built based on subsets of the data, in addition not all predictor variables are used every time, rather a random subset).
+One of the disadvantages of decision trees may be **overfitting** i.e. continually creating partitions to achieve a relatively homogeneous population. This problem can be alleviated by **pruning** the tree (CART), which is basically removing the decisions from the bottom to up. Another way is to **combine several trees** and obtain a consensus, which can be done via a process called **random forests** (bootstrapped version of CART - many trees built based on subsets of the data, in addition not all predictor variables are used every time, rather a random subset). [HOME]
 
 ```{r class.source = "fold-show",  eval=T}
 # Extra to exciting your curiosity
@@ -915,7 +949,7 @@ predict(iris.rf,newobs)
 plot(margin(iris.rf))
 ```
 
-### Multivariate Regression Trees: constrained clustering
+### Multivariate Regression Trees: constrained clustering [HOME]
 
 **Multivariate regression trees** (MRT; De’ath 2002) are an extension of univariate regression trees, a method allowing the recursive partitioning of a quantitative response variable under the control of a set of quantitative or categorical explanatory variables (Breiman et al. 1984). Such a procedure is sometimes called **constrained** or **supervised** clustering.The result is a tree whose “leaves” (terminal groups of sites) are composed of subsets of 'sites' chosen to minimize the within-group sums of squares (as in a _k_-means clustering), but where each successive partition is defined by a threshold value or a state of one of the explanatory variables.
 
@@ -941,10 +975,7 @@ spe.ch.mvpart <-
 ```
 
 
-
-
-
-#### Hello World to Machine Learning
+### Hello World to Machine Learning [HOME]
 
 
 Create a **Validation Dataset** We will split `iris` dataset into two, 80% of which we will use to train our models and 20% that we will hold back as a validation dataset. 
@@ -1043,11 +1074,11 @@ Basically, we learn about one **neurone** of a network. You are only one step to
 ![Machine Learning vs. Deep Learning](Figures/multi_MLDL.png)
 
 
-# Unconstrained Ordination
+# Ordinations
 
 ## Background
 
-[GUSTA ME](https://mb3is.megx.net/gustame) provides a guide to statistical analysis (community-focused) in Microbial Ecology. Very useful to help in the choice of the relevant analysis according to the type of data you are dealing with.
+[GUSTA ME](https://sites.google.com/site/mb3gustame/home?overridemobile=true) provides a guide to statistical analysis (community-focused) in Microbial Ecology. Very useful to help in the choice of the relevant analysis according to the type of data you are dealing with.
 
 ### Multidimensional space
 
@@ -1108,7 +1139,7 @@ doubspec<-doubs$fish[-8,]
 decorana(doubspec)
 ```
 
-## Unconstrained ordinations
+## Unconstrained ordination
 
 + **Principal Component Analysis (PCA)**: the main eigenvector-based method (and the most famous). Works on raw, quantitative data. Preserve the **Euclidean** distance among sites. 
 
@@ -1138,11 +1169,13 @@ The direction is given by eigenvector, and the strength by the eigenvalues.
 
 ![](Figures/multi_PCA2.png)
 
-Check it  [here](http://setosa.io/ev/principal-component-analysis/) for a very simple explanation of how PCA works, and [here](https://www.youtube.com/watch?v=9DPiXrN2pEg) for a simple example, and [here](https://www.youtube.com/watch?v=FgakZw6K1QQ) for a more detailed example.
+Check it  [here](http://setosa.io/ev/principal-component-analysis/) for a very simple explanation of how PCA works, and [here](https://www.youtube.com/watch?v=S51bTyIwxFs) for a
+a more detailed example. By the way *TileStats* channel is very good if you are looking at some simple explanation about statistics. It complements very well *StatQuest* explanation on [PCA](https://www.youtube.com/watch?v=FgakZw6K1QQ) for 
 
 
-#### Computation
+#### PCA in R
 
+##### Computation
 
 In R, a **PCA** can be computed with the function `rda` from the `vegan`among many other options.
 
@@ -1198,7 +1231,7 @@ summary(env.pca)$species
 summary(env.pca)$site
 ```
 
-#### Eigenvalues
+##### Eigenvalues
 
 Examine eigenvalues is important to decide how many axes to retain. Usually, the user examines the eigenvalues, and decides how many axes are worth representing and displaying on the basis of the amount of variance explained. The decision can be completely arbitrary (for
 instance, interpret the number of axes necessary to represent 75% of the variance of the data), or assisted by one of several procedures proposed to set a limit between the axes that represent interesting variation of the data and axes that merely display the remaining, essentially random variance. 
@@ -1210,7 +1243,7 @@ One of these procedures consists in computing a **broken stick model**, which ra
 screeplot(env.pca, bstick = TRUE, npcs = length(env.pca$CA$eig))
 ```
 
-#### Intepretation
+##### Intepretation
 
 The proportion of variance accounted for by the two axes is about 60 %: relative high value makes us confident that our interpretation of the first pair of axes extracts most relevant information from the data
 
@@ -1226,7 +1259,7 @@ dev.off()
 **Scaling 2**: Humdepth, Baresoil are very highly positively correlated. Those two variables are very highly negatively correlated with pH and Fe.
 
 
-#### Adding cluster
+##### Adding cluster
 
 ```{r,  eval=T, message=F}
 # combining clustering and ordination results
@@ -1236,9 +1269,9 @@ ordicluster(env.pca,
             prune=3, col = "blue", scaling=1)
 ```
 
-#### PCA on transformed species data (tb-PCA)
+##### PCA on transformed species data (tb-PCA)
 
-PCA being a linear method preserving the Euclidean distance among sites, it is not naturally adapted to the analysis of species abundance data. Hellinger pre-transformation of the data can solve this problem. 
+PCA being a linear method preserving the Euclidean distance among sites, it is not naturally adapted to the analysis of species abundance data. Hellinger transformation of the data can solve this problem. 
 
 ```{r,  eval=T, message=F}
 # Hellinger pre-transformation of the species data
@@ -1273,7 +1306,7 @@ plot(spe.h.pca.env, p.max = 0.05, col = 3)
 
 `envfit`  proposes permutation tests to assess the significance of the R^2^ of each explanatory variable regressed on the two axes of the biplot. But this is not, by far, the best way to test the effect of explanatory variables on a table of response variables.
 
-#### More on PCA
+##### More on PCA
 
 Conditions of applications:
 
@@ -1289,7 +1322,7 @@ Conditions of applications:
 
 
 <p class="comment">
-**Practice M4:** Using environmental dataset `carp.chemistry` from Carpathian wetland (mainly chemistry): (1)  remove the variable slope, which is not a chemical variable; (2) perform a PCA, and evaluate importance of ordination axes using the broken stick criterion; (3) make a biplots using scaling=1 and scaling 2 then interpret results; (4)  repeat the same for the species data associates. 
+**Practice 8.4** Using environmental dataset `carp.chemistry` from Carpathian wetland (mainly chemistry): (1)  remove the variable slope, which is not a chemical variable; (2) perform a PCA, and evaluate importance of ordination axes using the broken stick criterion; (3) make a biplots using scaling=1 and scaling 2 then interpret results; (4)  repeat the same for the species data associates. 
 </p>
 
 
@@ -1319,11 +1352,11 @@ clean.plot (PCA1)
 ```
 
 
-### Correspondance Analysis (CA)
+### Correspondance Analysis (CA) - For reference only
 
 + Data submitted to CA must be **frequencies or frequency-like, dimensionally homogeneous and non-negative**; that is the case of species counts or presence-absence data. 
 
-+ Accodingly, for a long time, **CA has been one of the favorite tools for the analysis of species presence-absence or abundance data** 
++ Accordingly, for a long time, **CA has been one of the favorite tools for the analysis of species presence-absence or abundance data** 
 
 + The raw data are first transformed into a matrix Q of cell-by-cell contributions to the **Pearson Chi-square statistic**, and the resulting table is submitted to a singular value decomposition to compute its  eigenvalues and eigenvectors
 
@@ -1420,16 +1453,15 @@ doubs.dca<-decorana(doubspec)
 plot(doubs.dca)
 ```
 
-
-
 <p class="comment">
-**Practice M5:** Using Ellenberg's Danube meadow dataset, data `mveg` from the package `dave`: (1) Compare the results of CA and DCA; (2) Try (more challenging) to combine the results of both  CA and DCA in the same ordination plot. (Tip 1) You may need functions `cca`, `decorana`, `ordiplot`, `scores` and `text`. (Tip 2) First calculate both CA and DCA on Danube data and draw CA ordination scatterplot (to draw only sites, in ordiplot use argument `display = 'sites'`). (Tip 3) To add sites from DCA, you need to shift their scores along the second (vertical) axis, otherwise they will be clustered together with CA samples. Add constant (e.g. 2) to the scores along the second axis. To extract scores, use the function scores on object DCA with argument `display = 'sites'` ) (Tip 4) To add sites from DCA into CA ordination plot, use low-level graphical function text on matrix of scores from DCA, with corrected second axis.(Tip 5). To avoid overlap of labels in text function, employ also the argument labels, which should contain values from rownames of DCA scores.  Results should look similar to this:
+**Practice 8.5** Using Ellenberg's Danube meadow dataset, data `mveg` from the package `dave`: (1) Compare the results of CA and DCA; (2) Try (more challenging) to combine the results of both  CA and DCA in the same ordination plot. (Tip 1) You may need functions `cca`, `decorana`, `ordiplot`, `scores` and `text`. (Tip 2) First calculate both CA and DCA on Danube data and draw CA ordination scatterplot (to draw only sites, in ordiplot use argument `display = 'sites'`). (Tip 3) To add sites from DCA, you need to shift their scores along the second (vertical) axis, otherwise they will be clustered together with CA samples. Add constant (e.g. 2) to the scores along the second axis. To extract scores, use the function scores on object DCA with argument `display = 'sites'` ) (Tip 4) To add sites from DCA into CA ordination plot, use low-level graphical function text on matrix of scores from DCA, with corrected second axis.(Tip 5). To avoid overlap of labels in text function, employ also the argument labels, which should contain values from rownames of DCA scores.  Results should look similar to this:
 </p>
 
 ![](Figures/multi_Ellenberg.png)
 
 
-### Principal Coordinate Analysis (PCoA)
+
+### Principal Coordinate Analysis (PCoA) - For reference only
 
 Also called **Multi-Dimensional Scaling (MDS)**
 
@@ -1478,7 +1510,6 @@ abline(h=0,lty=3)
 abline(v=0,lty=3)
 ```
 
-
 ### non-metric Multidimensional Scaling (nMDS)
 
 + If priority is not to preserve the exact distances among objects in an ordination diagram, but rather to represent as well as possible the ordering relationship among objects in a small and specified number of axes
@@ -1488,7 +1519,6 @@ abline(v=0,lty=3)
 + Method can cope with missing distances, as long  as there are enough measures left to position each object with respect to each other.
 
 This is **NOT** a eigenvalue based ordination method, and does not maximize the variability associated with individual axes of the ordination.
-
 
 #### Procedure
 
@@ -1586,10 +1616,13 @@ ordisurf(vare.mds ~ Baresoil, varechem, bubble = 5)
 ```
 
 <p class="comment">
-**Practice M6:** Using Tikus dataset (library `mvabund`) and the years 1981, 1983 and 1985: visualize Bray-Curtis dissimilaritie matrix into a nMDS ordination.  You will use different symbols for the different years. Add legend to the upper right corner of the ordination. Compare species composition among years using PERMANOVA `adonis` (?adonis) test. 
+**Practice 8.6** Using Tikus dataset (library `mvabund`) and the years 1981, 1983 and 1985: visualize Bray-Curtis dissimilaritie matrix into a nMDS ordination.  You will use different symbols for the different years. Add legend to the upper right corner of the ordination. Compare species composition among years using PERMANOVA `adonis` (?adonis) test. 
 </p>
 
-# Constrained ordinations
+
+------------------------
+
+## Constrained ordinations - for reference only
 
 Also called **direct Gradient Analysis** or **constrained Analysis**
 
@@ -1618,7 +1651,7 @@ At the opposite of unconstrained ordination, where effect of env. variables can 
 
 **RDA** has a wide application
 
-## Redundancy Analysis (RDA)
+### Redundancy Analysis (RDA)
 
 + **RDA** is a method combining **regression** and **principal component analysis** (direct extension of regression analysis to model multivariate response data)
 
@@ -1629,7 +1662,7 @@ At the opposite of unconstrained ordination, where effect of env. variables can 
 In RDA, the **number of canonical axes** corresponds to the **number of explanatory variables**, or more precisely to the number of **degrees of freedom**. Each canonical axes corresponds to a **linear combination** (i.e. **multiple regression model**) of all explanatory variables 
 
 
-### Computation
+#### Computation
 
 In `R`, the `vegan` functions:
 
@@ -1660,10 +1693,10 @@ RDA <- rda (Y ~ var1 + factorA + var2*var3 + Condition (var4), data = XW)
 
 In this example, the explanatory variables used are a quantitative variable `var1`, categorical variable `factorA`,and interaction term between `var2` and `var3`, whereas `var4` is used as covariable and idnetified to partially removed its effects.    
 
-### Examples (`doubs` data)
+#### Examples (`doubs` data)
 
 
-#### Data preparation
+##### Data preparation
 
 ```{r,  eval=T, message=F}
 # import the data
@@ -1696,7 +1729,7 @@ envchem <- env[,c(4:10)] # names(envchem), env. matrix isolated form env
 spe.hel<-decostand(spe,'hellinger') # spe matrix
 ```
 
-#### `rda`
+##### `rda`
 
 Same kind of formula as used in `lm` and other R functions devoted to regression. Check `?rda` for details.
 
@@ -1804,7 +1837,7 @@ The test of the axes can only be run with the formula synthax. How many canonica
 anova.cca(spe.rda,by='axis',step=1000)
 ```
 
-#### Partial `rda`
+##### Partial `rda`
 
 + **Partial canonical ordination** is the multivariate equivalent of partial linear regression: it is possible to run a RDA of a (transformed) plant species data matrix **Y**, explained by a matrix of climatic variables **X**, in the presence of soil covariables **W**. Display the patterns of the species data uniquely explained by a linear model of the climatic variables when the effect of the soil is held constant
 
@@ -1850,7 +1883,7 @@ arrows(0,0,spe4.sc[,1],spe4.sc[,2],length=0,lty=1,col='red')
 
 The result of this partial analysis differs somewhat from the previous results but not fundamentally. `har` and `nit` are less important in explaining the fish community structure. This may be due to the fact that these two variables are well correlated with the position along the river.
 
-#### Forward selection of explanatory variables
+##### Forward selection of explanatory variables
 
 + It happens we wish to reduce the number of explanatory variables. The reasons vary: search for parsimony, rich data set but poor at priori hypotheses, or a method producing a large set of explanatory variables which must be reduced afterwards. 
 
@@ -1879,7 +1912,7 @@ step.forward2 <- ordiR2step(rda(spe.hel~1,data=env), scope=formula(spe.rda.all),
 
 These analyses show that the most parsimonious attitude would be to settle a model containing only three variables: altitude, oxygen, and biological  oxygen demand
 
-#### Parsimonious RDA
+##### Parsimonious RDA
 
 ```{r,  eval=T, message=F, results='hide'}
 spe.rda.pars <- rda(spe.hel~alt+oxy+bdo, data=env)
@@ -1907,7 +1940,7 @@ arrows(0,0,spe5.sc[,1],spe5.sc[,2],length=0,lty=1, col='red')
 # since there is now a third significant canonical axis, you could compute other combinations: axes 1 and 3, axes 2 and 3
 ```
 
-#### Variation partitioning
+##### Variation partitioning
 
 + Variation partitioning is a type of analysis that combines RDA and partial RDA to divide the variation of a response variable among two, three or four explanatory data sets.
 
@@ -1929,7 +1962,7 @@ plot(spe.part.all, digits=2)
 The first partitioning shows that both sets of expl. variables contribute to the explanation of the species data. The unique contribution of the chemical variables (fraction [a], R2adj=0.229) is much larger than that of the physiography (R2adj=0.081). The variation explained jointly by the two sets (fraction [b], R2adj=0.245) is also large. This indicates that the chemical and physiographic variables are intercorrelated => good reason for parsimony
 
 
-## db-RDA
+### db-RDA
 
 + Distance-based Redundancy analysis
 
@@ -1949,3 +1982,10 @@ dbrda2<-capscale(spe.bray~pH+har+pho+nit+amm+oxy+bdo+ Condition(alt+slo+flo), di
 ### CCA ##
 
 Pending
+
+
+
+
+
+
+

@@ -1,3 +1,13 @@
+xaringanExtra::use_clipboard()
+
+
+
+
+
+
+
+
+
 library(Hmisc)
 library(corrplot)
 library(MASS)
@@ -9,7 +19,16 @@ library(readr)
 library(lme4)
 library (lmerTest)
 library(nlme)
+library(gvlma)
+library(simpleboot)
+library(DAAG)
+library(bootstrap)
+library(MBESS)
+library(leaps)
+library(sandwich)
+library(dplyr)
 
+# correlation
 rairuoho<-read.table('https://www.dipintothereef.com/uploads/3/7/3/5/37359245/rairuoho.txt',header=T, sep="\t", dec=".")
 cor.test(rairuoho$day6, rairuoho$day7)
 
@@ -27,10 +46,10 @@ abline(lm(rairuoho$day7~rairuoho$day6), col="red", lwd=2)
 #  stat_smooth(method = "lm", col = "red")
 
 model1 <- lm(Petal.Width ~ Petal.Length, data = iris)
-model1
+model1$coefficients
 
 ggplot(iris, aes(x = Petal.Length, y = Petal.Width)) +
-  geom_point() +
+  geom_point(aes(fill=Species),shape = 21, size=5) +
   stat_smooth(method = "lm", col = "blue")
 
 summary(model1)
@@ -39,56 +58,315 @@ confint(model1)
 
 sigma(model1)*100/mean(iris$Petal.Width)
 
-model2 <- lm(Petal.Width ~ Petal.Length + Sepal.Width + Sepal.Length, data = iris)
-summary(model2)
+fit1 <- lm(Petal.Width ~ Petal.Length + Sepal.Width + Sepal.Length, data = iris)
+summary(fit1)
 
-summary(model2)$coefficient
+# Other useful functions
+coefficients(fit1) # model coefficients
+confint(fit1, level=0.95) # CIs for model parameters
+fitted(fit1) # predicted values
+residuals(fit1) # residuals
+anova(fit1) # anova table
+vcov(fit1) # covariance matrix for model parameters
+influence(fit1) # regression diagnostics
 
-confint(model2)
+# diagnostic plots
+layout(matrix(c(1,2,3,4),2,2)) # optional 4 graphs/page
+plot(fit1)
 
-sigma(model2)/mean(iris$Petal.Width)
+# Assessing Outliers
+outlierTest(fit1) # Bonferonni p-value for most extreme obs
+qqPlot(fit1, main="QQ Plot") #qq plot for studentized resid
+leveragePlots(fit1) # leverage plots
 
-model3 <- lm(Petal.Width ~., data = iris[,1:4])
-# the "." means: take all variable except as predictors exept Petal.Width which is our response variable
+# Influential Observations
+# added variable plots
+avPlots(fit1)
+# Cook's D plot
+# identify D values > 4/(n-k-1)
+cutoff <- 4/((nrow(iris)-length(fit1$coefficients)-2))
+plot(fit1, which=4, cook.levels=cutoff)
+# Influence Plot
+influencePlot(fit1, id.method="identify", main="Influence Plot", sub="Circle size is proportial to Cook's Distance" )
 
-model4 <- lm(Petal.Width ~. -Sepal.Width, data = iris[,1:4])
+# Normality of Residuals
+# qq plot for studentized resid
+qqPlot(fit1, main="QQ Plot")
+# distribution of studentized residuals
+sresid <- studres(fit1)
+hist(sresid, freq=FALSE,
+   main="Distribution of Studentized Residuals")
+xfit<-seq(min(sresid),max(sresid),length=40)
+yfit<-dnorm(xfit)
+lines(xfit, yfit)
 
-model5 <-  update(model2,  ~. -Sepal.Length)
-
-BIC(model3); BIC(model4);BIC(model5)
-model3 <- lm(Petal.Width ~., data = iris[,1:4])
-AIC(model3); AIC(model4);AIC(model5)
-
-#Stepwise Selection based on AIC
-step <- stepAIC(model3, direction='backward')
-summary(step)
-
-#Stepwise Selection with BIC
-n = dim(iris[,1:4])[1]
-stepBIC = stepAIC(model3,k=log(n), direction='backward')
-summary(stepBIC)
-
-model3 <- lm(Petal.Width ~., data = iris[,1:4])
-
-plot(model3)
-
-plot(model3,1)
-
-plot(model3,2)
-
-plot(model3,3)
-
-plot(model3,5)
+# Evaluate homoscedasticity
+# non-constant error variance test
+ncvTest(fit1)
+# plot studentized residuals vs. fitted values
+spreadLevelPlot(fit1)
 
 corr<-cor(iris[,1:3])
-p.val<-rcorr(as.matrix(rairuoho[,1:3]))$P
-corrplot(corr,type='upper',method='color', addCoef.col = "black", p.mat=as.matrix(p.val), sig.level = 0.05,diag=F)
+p.val<-rcorr(as.matrix(iris[,1:3]))$P
+corrplot(corr,type='upper',method='color', addCoef.col = "black",  p.mat=as.matrix(p.val), sig.level = 0.05,diag=F)
 
-vif(model3)
-#remove Petal.Length
-model6 <- lm(Petal.Width ~. -Petal.Length, data = iris[,1:4])
-vif(model6)
-plot(model6)
+# Evaluate Collinearity
+car::vif(fit1) # variance inflation factors
+sqrt(car::vif(fit1)) > 2 # problem?
+
+# Evaluate Nonlinearity
+# component + residual plot
+crPlots(fit1)
+# Ceres plots
+ceresPlots(fit1)
+
+# Test for Autocorrelated Errors
+durbinWatsonTest(fit1)
+
+gvmodel <- gvlma(fit1)
+summary(gvmodel)
+
+boxcoxfit <- boxcox(fit1,plotit=T)
+# also see `boxCox` from **car**
+# also see `BoxCoxTrans` from **caret** for individual variable
+
+lambda <- boxcoxfit$x[which.max(boxcoxfit$y)]
+
+#fit new linear regression model using the Box-Cox transformation
+new_fit <- lm(((iris$Petal.Width^lambda-1)/lambda) ~ Petal.Length + Sepal.Width + Sepal.Length, data = iris)
+
+gvlma(new_fit)
+# not better at all
+
+set.seed(2021)
+n <- 1000
+x <- rnorm(n)
+y <- x + rnorm(n)
+population.data <- as.data.frame(cbind(x, y))
+
+sample.data <- population.data[sample(nrow(population.data), 20, replace = TRUE),]
+
+population.model <- lm(y~x, population.data)
+summary (population.data)
+
+sample.model <- lm(y~x, sample.data)
+summary (sample.model)
+
+#Plotting the models
+plot(y ~ x, col = "gray", main = 'Population and Sample Regressions')
+abline(coef(population.model)[1], coef(population.model)[2], col = "red")
+abline(coef(sample.model)[1],
+       coef(sample.model)[2],
+       col = "blue",
+       lty = 2)
+legend(
+  "topleft",
+  legend = c("Sample", "Population"),
+  col = c("red", "blue"),
+  lty = 1:2,
+  cex = 0.8)
+
+# Containers for the coefficients
+sample_coef_intercept <- NULL
+sample_coef_x1 <- NULL
+
+for (i in 1:1000) {
+  #Creating a resampled dataset from the sample data
+  sample_d = sample.data[sample(1:nrow(sample.data), nrow(sample.data), replace = TRUE), ]
+  
+  #Running the regression on these data
+  model_bootstrap <- lm(y ~ x, data = sample_d)
+  
+  #Saving the coefficients
+  sample_coef_intercept <-
+    c(sample_coef_intercept, model_bootstrap$coefficients[1])
+  
+  sample_coef_x1 <-
+    c(sample_coef_x1, model_bootstrap$coefficients[2])
+}
+
+coefs <- rbind(sample_coef_intercept, sample_coef_x1)
+
+# Combining the results in a table
+means.boot = c(mean(sample_coef_intercept), mean(sample_coef_x1))
+knitr::kable(round(
+  cbind(
+    population = coef(summary(population.model))[, 1],
+    sample = coef(summary(sample.model))[, 1],
+    bootstrap = means.boot),4), 
+  "simple", caption = "Coefficients in different models")
+
+a <-
+  cbind(
+    quantile(sample_coef_intercept, prob = 0.025),
+    quantile(sample_coef_intercept, prob = 0.975))
+b <-
+  cbind(quantile(sample_coef_x1, prob = 0.025),
+        quantile(sample_coef_x1, prob = 0.975))
+
+c <-
+  round(cbind(
+    population = confint(population.model),
+    sample = confint(sample.model),
+    boot = rbind(a, b)), 4)
+colnames(c) <- c("2.5 %", "97.5 %",
+                 "2.5 %", "97.5 %",
+                 "2.5 %", "97.5 %")
+knitr::kable(rbind(
+  c('population',
+    'population',
+    'sample',
+    'sample',
+    'bootstrap',
+    'bootstrap'),c),caption = "Precision of the confidence intervals")
+
+
+#Predicting on new data
+new.data = seq(min(x), max(x), by = 0.05)
+conf_interval <-
+  predict(
+    sample.model,
+    newdata = data.frame(x = new.data),
+    interval = "confidence",
+    level = 0.95)
+
+#Plotting the results on the project step-by-spep
+plot(
+  y ~ x,
+  col = "gray",
+  xlab = "x",
+  ylab = "y",
+  main = "Compare regressions")
+apply(coefs, 2, abline, col = rgb(1, 0, 0, 0.03))
+
+plot(
+  y ~ x,
+  col = "gray",
+  xlab = "x",
+  ylab = "y",
+  main = "Compare regressions")
+apply(coefs, 2, abline, col = rgb(1, 0, 0, 0.03))
+abline(coef(population.model)[1], coef(population.model)[2], col = "blue")
+abline(coef(sample.model)[1],
+       coef(sample.model)[2],
+       col = "black",
+       lty = 2, lwd=3)
+abline(mean(sample_coef_intercept),
+       mean(sample_coef_x1),
+       col = "green",
+       lty = 4, lwd=3)
+
+plot(
+  y ~ x,
+  col = "gray",
+  xlab = "x",
+  ylab = "y",
+  main = "Compare regressions")
+apply(coefs, 2, abline, col = rgb(1, 0, 0, 0.03))
+abline(coef(population.model)[1], coef(population.model)[2], col = "blue")
+abline(coef(sample.model)[1],
+       coef(sample.model)[2],
+       col = "black",
+       lty = 2, lwd=3)
+abline(mean(sample_coef_intercept),
+       mean(sample_coef_x1),
+       col = "green",
+       lty = 4, lwd=3)
+lines(new.data, conf_interval[, 2], col = "black", lty = 3, lwd=3)
+lines(new.data, conf_interval[, 3], col = "black", lty = 3, lwd=3)
+legend("topleft",
+       legend = c("Bootstrap", "Population", 'Sample'),
+       col = c("red", "blue", 'green'),
+       lty = 1:3,
+       cex = 0.8)
+
+fit1 <- lm(Petal.Width ~ Petal.Length + Sepal.Width + Sepal.Length, data = iris) # sqrt(vif(fit1)) >2 not good
+fit2 <- lm(Petal.Width ~ Sepal.Width + Sepal.Length, data = iris)
+sqrt(car::vif(fit2)) >2 # okay
+gvlma(fit2)
+boxcoxfit2 <- boxcox(fit2,plotit=T)
+lambda2 <- boxcoxfit2$x[which.max(boxcoxfit2$y)]
+new_fit2 <- lm(((iris$Petal.Width^lambda2-1)/lambda2) ~  Sepal.Width + Sepal.Length, data = iris)
+gvlma(new_fit2)
+
+fit2.boot<-lm.boot(fit2, R=1000)
+summary(fit2.boot)
+
+# can specify casewise or residual sampling with the method argument
+fit3.boot <- Boot(fit2, f=coef, R=1000, method=c("case"))
+summary(fit3.boot, high.moments=T)
+
+# K-fold cross-validation
+cv.lm(iris, fit2, m=3) # 3 fold cross-validation
+
+# Assessing R2 shrinkage using 10-Fold Cross-Validation
+# define functions
+theta.fit <- function(x,y){lsfit(x,y)}
+theta.predict <- function(fit,x){cbind(1,x)%*%fit$coef}
+# matrix of predictors
+X <- as.matrix(iris[c("Sepal.Width","Sepal.Length")])
+# vector of predicted values
+y <- as.matrix(iris[c("Petal.Width")])
+results <- crossval(X,y,theta.fit,theta.predict,ngroup=3)
+cor(y, fit2$fitted.values)**2 # raw R2
+cor(y,results$cv.fit)**2 # cross-validated R2
+
+data(prof.salary)
+
+fit.prof1 <- lm(salary~pub, data=prof.salary)
+fit.prof2  <- lm(salary~citation, data=prof.salary)
+fit.prof3 <- lm(salary~pub+citation, data=prof.salary)
+fit.prof4  <- lm(salary~citation+pub, data=prof.salary)
+
+# compare model 3 to model 1 - stepping approach, evaluating a new variable (cits)
+anova(fit.prof1,fit.prof3)# note this is anova, not Anova
+
+# compare model 3 to model 2 - stepping approach, evaluating a new variable (pubs)
+anova(fit.prof2,fit.prof3)# note this is anova, not Anova
+
+BIC(fit.prof1); BIC(fit.prof2);BIC(fit.prof3)
+AIC(fit.prof1); AIC(fit.prof2);AIC(fit.prof3)
+
+# Stepwise Selection based on AIC
+fit.prof5  <- lm(salary~citation+pub+time, data=prof.salary)
+step1 <- stepAIC(fit.prof5, direction="both")
+step1$anova # display results
+
+
+#Stepwise Selection with BIC
+n<-dim(prof.salary)[1]
+step2 <- stepAIC(fit.prof5, k=log(n), direction="both")
+step2$anova # display results
+
+# All Subsets Regression
+leaps<-regsubsets(salary~citation+pub+time, data=prof.salary,nbest=10)
+# view results
+summary(leaps)
+# plot a table of models showing variables in each model.
+# models are ordered by the selection statistic.
+plot(leaps,scale="r2")
+# plot statistic by subset size
+# subsets(leaps, statistic="rsq")
+
+fit.prof6  <- lm(salary~citation+time, data=prof.salary)
+# gvlma(fit.prof6)
+summary(fit.prof6)
+
+summary(fit.prof6)$coefficient
+
+confint(fit.prof6)
+
+sigma(fit.prof6)/mean(prof.salary$salary)
+
+model.full <- lm(salary ~., data = prof.salary)
+
+model.partial1 <- lm(salary ~. -sex, data = prof.salary)
+
+model.partial2 <-  update(model.full,  ~. -sex)
+
+students<-read.table('https://www.dipintothereef.com/uploads/3/7/3/5/37359245/students.txt',header=T, sep="\t", dec='.') 
+lm.cat<-lm(shoesize~gender, data=students)
+anova(lm.cat)
 
 iris.lm<-lm(Petal.Width ~ Species, data=iris)
 summary(iris.lm)
@@ -160,14 +438,6 @@ summary(cleaner.type.int.lm)
 
 cat_plot(cleaner.type.int.lm, pred = cleaner, modx = type, interval = TRUE)
 
-fitiris <- lm(Petal.Width ~ Petal.Length*Species, data = iris)
-interact_plot(fitiris, pred = Petal.Length, modx = Species, plot.points=T)
-
-fitiris <- lm(Petal.Width ~ Petal.Length*Species, data = iris)
-# In evaluating an ANCOVA model, we want to sequentially ask first whether there is a difference in slope, then if there is not, look for differences in intercept. 
-# In addition, there is variety of way to calculate the sum of squares. Here (but this debatable), we would prefer a type 3 Anova especially since we have an interaction term in our Ancova (see Homogeneity of slope assumption in ANCOVA)
-car::Anova(fitiris, type = 3)
-
 # Step 1: Calculate regression object with lm()
 time.lm <- lm(formula = time ~ type + cleaner, data = poopdeck)
 
@@ -195,20 +465,42 @@ mean(abs(poopdeck$me.fit - poopdeck$time))
 shapiro.test(cleaner.type.int.aov$residuals) # test our residuals vs a normal distribution
 bartlett.test(cleaner.type.int.aov$residuals ~ interaction(cleaner, type), data = poopdeck) # test variance of our residuals in the different groups.
 
-shag <- read.csv("Data/shagLPI.csv", header = TRUE)
-shag$year <- as.numeric(shag$year)  #  year should be a numeric variable
-shag.hist <- ggplot(shag, aes(pop)) + geom_histogram() 
-shag.hist
+AWARD <- read.csv("https://stats.idre.ucla.edu/stat/data/poisson_sim.csv")
+AWARD <- within(AWARD,{
+  prog <- factor(prog, levels=1:3, labels=c("General", "Academic","Vocational"))
+  id <- factor(id)
+})
+summary(AWARD)
 
-shag.m <- glm(pop ~ year, family = poisson, data = shag)
-summary(shag.m)
+AWARD.hist <- ggplot(AWARD, aes(num_awards, fill=prog)) +
+  geom_histogram(binwidth = .5,  position="dodge") 
 
-shag.p <- ggplot(shag, aes(x = year, y = pop)) +
-    geom_point(colour = "#483D8B") +
-    geom_smooth(method = "glm", method.args = list(family = 'poisson'),se=TRUE, colour = "#483D8B", fill = "#483D8B", alpha = 0.6) +
-    scale_x_continuous(breaks = c(1975, 1980, 1985, 1990, 1995, 2000, 2005)) +
-    labs(x = " ", y = "European Shag abundance")
-shag.p
+AWARD.hist
+
+summary(m1 <- glm(num_awards ~ prog + math, family="poisson", data=AWARD))
+
+cov.m1 <- vcovHC(m1, type="HC0")
+std.err <- sqrt(diag(cov.m1))
+r.est <- cbind(Estimate= coef(m1), "Robust SE" = std.err,
+"Pr(>|z|)" = 2 * pnorm(abs(coef(m1)/std.err), lower.tail=FALSE),
+LL = coef(m1) - 1.96 * std.err,
+UL = coef(m1) + 1.96 * std.err)
+r.est
+
+with(m1, cbind(res.deviance = deviance, df = df.residual,
+  AWARD = pchisq(deviance, df.residual, lower.tail=FALSE)))
+
+## calculate and store predicted values
+AWARD$phat <- predict(m1, type="response")
+
+## order by program and then by math
+AWARD <- AWARD[with(AWARD, order(prog, math)), ]
+
+## create the plot
+ggplot(AWARD, aes(x = math, y = phat, colour = prog)) +
+  geom_point(aes(y = num_awards), alpha=.5, position=position_jitter(h=.2)) +
+  geom_line(size = 1) +
+  labs(x = "Math Score", y = "Expected number of awards")
 
 Weevil_damage <- read.csv("Data/Weevil_damage.csv")
 Weevil_damage$block <- as.factor(Weevil_damage$block) # Making block a factor
@@ -220,8 +512,32 @@ rai<-rairuoho %>% pivot_longer(day3:day8, names_to = "day", values_to = "length"
 rai$day<-parse_number(rai$day)
 rai
 
+
+ggplot(rai, aes(x = day, y = length)) +
+  geom_point() +
+  scale_x_continuous(breaks = 0:9)+
+  facet_wrap(~ID)
+
 lmer.rai<-lmer(length ~ day + (1|ID), data=rai, REML=TRUE) # REML default
 summary(lmer.rai)
+
+
+newdata <- crossing(ID = rai %>% pull(ID),
+  day = 3:8)
+
+head(newdata)
+
+newdata2 <- newdata %>%
+  mutate(length = predict(lmer.rai, newdata))
+
+# plot
+ggplot(rai, aes(x = day, y = length)) +
+  geom_line(data = newdata2,
+            color = 'blue') +
+  geom_point() +
+  scale_x_continuous(breaks = 0:7) +
+  facet_wrap(~ID) +
+  labs(y = "Length", x = "Days")
 
 anova(lmer.rai)
 

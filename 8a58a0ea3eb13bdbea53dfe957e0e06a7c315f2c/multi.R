@@ -19,13 +19,12 @@ library(mvabund)
 library(mvpart) # install_github("cran/mvpart", force = T) # after devtools
 library(MVPARTwrap) # install_github("cran/MVPARTwrap", force = T) # after devtools
 
-Sys.setlocale("LC_ALL", "English")
-
-
-source('https://www.dipintothereef.com/uploads/3/7/3/5/37359245/coldiss.r') # import coldiss () function  (Borcard et al. 2011) 
+#  functions from Borcard et al. 2011
+source('https://www.dipintothereef.com/uploads/3/7/3/5/37359245/coldiss.r') 
 source ('https://www.dipintothereef.com/uploads/3/7/3/5/37359245/panelutils.r')
 source ('https://www.dipintothereef.com/uploads/3/7/3/5/37359245/cleanplot.pca.r')
 source ('https://www.dipintothereef.com/uploads/3/7/3/5/37359245/evplot.r')
+#Sys.setlocale("LC_ALL", "English")
 
 # ?varespec
 data (varespec)
@@ -229,6 +228,8 @@ plot(spe.ch.UPGMA, main='Average linkage')
 rect.hclust(spe.ch.UPGMA, k=3)
 rect.hclust(spe.ch.UPGMA, k=8, border = 'blue')
 
+# note on the of Euclidean distance and Ward.D: SS based clustering 
+# Bray + UPGMA can be try
 # ?doubs
 data(doubs)
 doubs.spe<-doubs$fish
@@ -238,6 +239,7 @@ doubs.spe <- doubs.spe[-8,]
 doubs.spa <- doubs.spa[-8,]
 # Calculates hierarchical cluster analysis of species data 
 eucl.ward <- hclust (d = dist (doubs.spe), method = 'ward.D')
+fviz_nbclust(doubs.spe, hcut, diss=dist(doubs.spe, method='euclidean'),method = "wss",hc_method = "single")
 # Dendrogram with the observed groups
 par(mfrow=c(1,2))
 plot (eucl.ward)
